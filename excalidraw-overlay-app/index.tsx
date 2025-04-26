@@ -4,12 +4,14 @@ import { createRoot } from "react-dom/client";
 import "@excalidraw/excalidraw/index.css";
 
 import type * as TExcalidraw from "@excalidraw/excalidraw";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 
 import App from "./components/ExcalidrawOverlayApp";
 
 declare global {
   interface Window {
     ExcalidrawLib: typeof TExcalidraw;
+    excalidrawAPI: ExcalidrawImperativeAPI;
   }
 }
 

@@ -45,3 +45,49 @@ html {
 //   --color-primary-light: #fcc2d7;
 
 // }
+
+div.App-menu.App-menu_top.hidden {
+  display: none;
+}
+
+/* footer.App-menu.App-menu_bottom {
+  bottom: initial;
+  top: 1rem;
+  padding: 0 8rem 0 5rem;
+} */
+
+footer.App-menu.App-menu_bottom.hidden {
+  display: none;
+}
+
+/* div.Island.App-menu__left {
+  width: 100%;
+
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0.1rem;
+
+  display: flex;
+  justify-content: center;
+}
+
+div.Island.App-menu__left > .panelColumn {
+  flex-direction: row;
+
+  background-color: var(--island-bg-color);
+  box-shadow: var(--shadow-island);
+  border-radius: var(--border-radius-lg);
+  padding-top: 0.3em;
+}
+
+div.Island.App-menu__left > .panelColumn > * {
+  padding: 0 1rem;
+}
+
+div.Island.App-menu__left > .panelColumn > fieldset > legend {
+  display: none;
+}
+
+div.Island.App-menu__left > .panelColumn > div > h3 {
+  display: none;
+} */
