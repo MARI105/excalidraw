@@ -8,6 +8,22 @@ import { easeOut } from "./utils";
 import { getClientColor } from "./clients";
 import { DEFAULT_LASER_COLOR } from "./constants";
 
+const SIZE = 2;
+const getSize = () => (window as any).LASERPOINTER_SIZE ?? SIZE;
+
+// decay time in milliseconds
+const DECAY_TIME = 1000;
+const getDecayTime = () =>
+  (window as any).LASERPOINTER_DECAY_TIME ?? DECAY_TIME;
+
+// length of line in points before it starts decaying
+const DECAY_LENGTH = 50;
+const getDecayLength = () =>
+  (window as any).LASERPOINTER_DECAY_LENGTH ?? DECAY_LENGTH;
+
+const getColor = () =>
+  (window as any).LASERPOINTER_COLOR ?? DEFAULT_LASER_COLOR;
+
 export class LaserTrails implements Trail {
   public localTrail: AnimatedTrail;
   private collabTrails = new Map<SocketId, AnimatedTrail>();
@@ -22,17 +38,18 @@ export class LaserTrails implements Trail {
 
     this.localTrail = new AnimatedTrail(animationFrameHandler, app, {
       ...this.getTrailOptions(),
-      fill: () => DEFAULT_LASER_COLOR,
+      fill: () => getColor(),
     });
   }
 
   private getTrailOptions() {
     return {
+      size: getSize(),
       simplify: 0,
       streamline: 0.4,
       sizeMapping: (c) => {
-        const DECAY_TIME = 1000;
-        const DECAY_LENGTH = 50;
+        const DECAY_TIME = getDecayTime();
+        const DECAY_LENGTH = getDecayLength();
         const t = Math.max(
           0,
           1 - (performance.now() - c.pressure) / DECAY_TIME,
