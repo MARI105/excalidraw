@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#000000" />
+
+    <title>Excalidraw Overlay App</title>
+    <script>
+      window.EXCALIDRAW_ASSET_PATH =
+        "https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/";
+
+      window.LASERPOINTER_SIZE = 2;
+      window.LASERPOINTER_DECAY_TIME = 3000;
+      window.LASERPOINTER_DECAY_LENGTH = 100;
+      window.LASERPOINTER_COLOR = 'red';
+    </script>
+  </head>
+
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="root"></div>
+
+    <script type="module">
+      import * as ExcalidrawLib from "@excalidraw/excalidraw";
+
+      console.log(ExcalidrawLib);
+      window.ExcalidrawLib = ExcalidrawLib;
+    </script>
+    <script type="module" src="index.tsx"></script>
+  </body>
+</html>
