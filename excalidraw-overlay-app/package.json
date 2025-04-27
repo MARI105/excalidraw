@@ -14,11 +14,13 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "yarn run copy:fonts && vite build",
     "preview": "vite preview --port 5002",
     "build:preview": "yarn build && yarn preview",
     "build:package": "yarn workspace @excalidraw/excalidraw run build:esm",
+    "copy:fonts": "cp -r ../node_modules/@excalidraw/excalidraw/dist/prod/fonts public/fonts",
     "rm:build": "rm -rf {build,dist}",
-    "rm:node_modules": "rm -rf node_modules"
+    "rm:node_modules": "rm -rf node_modules",
+    "rm:fonts": "rm -rf public/fonts"
   }
 }
