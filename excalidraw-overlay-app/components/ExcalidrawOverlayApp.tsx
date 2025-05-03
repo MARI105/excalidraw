@@ -24,10 +24,23 @@ export default function ExcalidrawOverlayApp({
   children,
   excalidrawLib,
 }: AppProps) {
+  const { MainMenu } = excalidrawLib;
+
   const appRef = useRef<any>(null);
 
   const [excalidrawAPI, setExcalidrawAPI] =
     useState<ExcalidrawImperativeAPI | null>(null);
+
+  const [laserPointerColor, setLaserPointerColor] = useState<string>(
+    (window as any).LASERPOINTER_COLOR,
+  );
+
+  const [laserPointerDecayTime, setLaserPointerDecayTime] = useState<number>(
+    (window as any).LASERPOINTER_DECAY_TIME,
+  );
+
+  const [laserPointerDecayLength, setLaserPointerDecayLength] =
+    useState<number>((window as any).LASERPOINTER_DECAY_LENGTH);
 
   useEffect(() => {
     (window as any).excalidrawAPI = excalidrawAPI;
@@ -60,7 +73,59 @@ export default function ExcalidrawOverlayApp({
         handleKeyboardGlobally: true,
         autoFocus: true,
       },
-      <></>,
+      <>
+        <MainMenu>
+          <MainMenu.DefaultItems.LoadScene />
+          <MainMenu.DefaultItems.Export />
+          <MainMenu.DefaultItems.SaveAsImage />
+          <MainMenu.DefaultItems.CommandPalette />
+          <MainMenu.DefaultItems.SearchMenu />
+          <MainMenu.DefaultItems.Help />
+          <MainMenu.DefaultItems.ClearCanvas />
+          <MainMenu.DefaultItems.ChangeCanvasBackground />
+          <MainMenu.Group title="Laser pointer">
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">Color</label>
+              <input
+                className="main-menu-item-custom-input"
+                type="color"
+                value={laserPointerColor}
+                onChange={(event) => {
+                  (window as any).LASERPOINTER_COLOR = event.target.value;
+                  setLaserPointerColor(event.target.value);
+                }}
+              />
+            </MainMenu.ItemCustom>
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">Decay time</label>
+              <input
+                className="main-menu-item-custom-input"
+                type="text"
+                value={laserPointerDecayTime}
+                onChange={(event) => {
+                  (window as any).LASERPOINTER_DECAY_TIME = event.target.value;
+                  setLaserPointerDecayTime(Number(event.target.value));
+                }}
+              />
+            </MainMenu.ItemCustom>
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">
+                Decay length
+              </label>
+              <input
+                className="main-menu-item-custom-input"
+                type="text"
+                value={laserPointerDecayLength}
+                onChange={(event) => {
+                  (window as any).LASERPOINTER_DECAY_LENGTH =
+                    event.target.value;
+                  setLaserPointerDecayLength(Number(event.target.value));
+                }}
+              />
+            </MainMenu.ItemCustom>
+          </MainMenu.Group>
+        </MainMenu>
+      </>,
     );
     return newElement;
   };
@@ -74,9 +139,9 @@ export default function ExcalidrawOverlayApp({
 
 // Defaults
 (window as any).LASERPOINTER_SIZE = 3;
+(window as any).LASERPOINTER_COLOR = "#ff0000";
 (window as any).LASERPOINTER_DECAY_TIME = 3000;
 (window as any).LASERPOINTER_DECAY_LENGTH = 100;
-(window as any).LASERPOINTER_COLOR = "red";
 
 let excalidrawPreset = 1;
 

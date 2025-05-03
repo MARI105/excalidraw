@@ -31,6 +31,17 @@ html {
   overflow: hidden;
 }
 
+.main-menu-item-custom-label {
+  width: 50%;
+  text-align: left;
+}
+
+input[type=text].main-menu-item-custom-input, 
+input[type=color].main-menu-item-custom-input {
+  width: 50%;
+  padding: 0.1rem;
+}
+
 // :root[dir="ltr"]
 //   .excalidraw
 //   .layer-ui__wrapper
