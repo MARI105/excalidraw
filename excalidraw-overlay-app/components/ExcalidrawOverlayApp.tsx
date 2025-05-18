@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 import type * as TExcalidraw from "@excalidraw/excalidraw";
+import { CaptureUpdateAction } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 
 import "./ExcalidrawOverlayApp.scss";
@@ -41,6 +42,25 @@ export default function ExcalidrawOverlayApp({
 
   const [laserPointerDecayLength, setLaserPointerDecayLength] =
     useState<number>((window as any).LASERPOINTER_DECAY_LENGTH);
+
+  const [sceneDecay, setSceneDecay] = useState<boolean>(
+    (window as any).SCENE_DECAY,
+  );
+
+  const [sceneDecayTime, setSceneDecayTime] = useState<number>(
+    (window as any).SCENE_DECAY_TIME,
+  );
+
+  const [sceneDecayLength, setSceneDecayLength] = useState<number>(
+    (window as any).SCENE_DECAY_LENGTH,
+  );
+
+  useEffect(() => {
+    initSceneDecay();
+    return () => {
+      initSceneDecay();
+    };
+  }, [sceneDecay]);
 
   useEffect(() => {
     (window as any).excalidrawAPI = excalidrawAPI;
@@ -124,6 +144,44 @@ export default function ExcalidrawOverlayApp({
               />
             </MainMenu.ItemCustom>
           </MainMenu.Group>
+          <MainMenu.Group title="Scene decay">
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">Decay</label>
+              <input
+                className="main-menu-item-custom-input"
+                type="checkbox"
+                checked={sceneDecay}
+                onChange={(event) => {
+                  (window as any).SCENE_DECAY = event.target.checked;
+                  setSceneDecay(event.target.checked);
+                }}
+              />
+            </MainMenu.ItemCustom>
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">Decay time</label>
+              <input
+                className="main-menu-item-custom-input"
+                type="text"
+                value={sceneDecayTime}
+                onChange={(event) => {
+                  (window as any).SCENE_DECAY_TIME = Number(event.target.value);
+                  setSceneDecayTime(Number(event.target.value));
+                }}
+              />
+            </MainMenu.ItemCustom>
+            <MainMenu.ItemCustom>
+              <label className="main-menu-item-custom-label">Decay length</label>
+              <input
+                className="main-menu-item-custom-input"
+                type="text"
+                value={sceneDecayLength}
+                onChange={(event) => {
+                  (window as any).SCENE_DECAY_LENGTH = Number(event.target.value);
+                  setSceneDecayLength(Number(event.target.value));
+                }}
+              />
+            </MainMenu.ItemCustom>
+          </MainMenu.Group>
         </MainMenu>
       </>,
     );
@@ -143,11 +201,96 @@ export default function ExcalidrawOverlayApp({
 (window as any).LASERPOINTER_DECAY_TIME = 3000;
 (window as any).LASERPOINTER_DECAY_LENGTH = 100;
 
+(window as any).SCENE_DECAY = false;
+(window as any).SCENE_DECAY_TIME = 3000;
+(window as any).SCENE_DECAY_LENGTH = 100;
+(window as any).SCENE_DECAY_UPDATE_INTERVAL = 50;
+
+let sceneDecayInterval = null;
 let excalidrawPreset = 1;
 
-setTimeout(() => {
-  selectPreset1();
-}, 1000);
+init();
+
+function init() {
+  setTimeout(() => {
+    selectPreset1();
+    initSceneDecay();
+  }, 1000);
+}
+
+function emptyScene() {
+  window.excalidrawAPI.updateScene({ elements: [] });
+  window.excalidrawAPI.history.clear();
+}
+
+function initSceneDecay() {
+  clearInterval(sceneDecayInterval);
+  sceneDecayInterval = null;
+  
+  if ((window as any).SCENE_DECAY) {
+    resetSceneDecay();
+    
+    sceneDecayInterval = setInterval(() => {
+      updateSceneDecay();
+    }, (window as any).SCENE_DECAY_UPDATE_INTERVAL);
+  }
+}
+
+function resetSceneDecay() {
+  const elements = window.excalidrawAPI.getSceneElements();
+  for (const element of elements) {
+    delete element.customData;
+  }
+}
+
+function toggleSceneDecay() {
+  (window as any).SCENE_DECAY = !(window as any).SCENE_DECAY;
+}
+
+function updateSceneDecay() {
+  const now = Date.now();
+  let updated = false;
+  const opacityDecayStep =
+    100 /
+    (((window as any).SCENE_DECAY_LENGTH * 10) /
+      (window as any).SCENE_DECAY_UPDATE_INTERVAL);
+  
+  const selectedElementIds = window.excalidrawAPI.getAppState().selectedElementIds;
+  const elements = window.excalidrawAPI.getSceneElements();
+  
+  for (const element of elements) {
+    if (selectedElementIds[element.id]) {
+      element.customData = {
+        decayStarted: now,
+      };
+    }
+    else {
+      element.customData = {
+        decayStarted: Math.max(
+          element?.customData?.decayStarted ?? element.updated,
+          element.updated,
+        ),
+        // decayStarted: Math.max(
+        //   element?.customData?.decayStarted ?? now,
+        //   element.updated,
+        // ),
+      };
+    }
+
+    if ((element.customData.decayStarted + (window as any).SCENE_DECAY_TIME) < now) {
+      element.opacity = Math.max(0, element.opacity - opacityDecayStep);
+      updated = true;
+    }
+  }
+  
+  if (updated) {
+    const decayingElements = elements.filter((e) => e.opacity > 0);
+    window.excalidrawAPI.updateScene({
+      elements: decayingElements,
+      captureUpdate: CaptureUpdateAction.NEVER,
+    });
+  }
+}
 
 function showHideControls() {
   const appMenuTopElement = document.querySelector("div.App-menu.App-menu_top");
@@ -157,11 +300,6 @@ function showHideControls() {
 
   appMenuTopElement.classList.toggle("hidden");
   appMenuBottomElement.classList.toggle("hidden");
-}
-
-function emptyScene() {
-  window.excalidrawAPI.updateScene({ elements: [] });
-  window.excalidrawAPI.history.clear();
 }
 
 function selectPreset1() {
@@ -231,6 +369,17 @@ document.addEventListener(
     // Alt + E - Empty scene
     else if (event.altKey && event.code === "KeyE") {
       emptyScene();
+    }
+
+    // Alt + D - Scene decay
+    else if (event.altKey && event.code === "KeyD") {
+      toggleSceneDecay();
+      initSceneDecay();
+
+      window.excalidrawAPI.setToast({
+        message: `Scene decay ${(window as any).SCENE_DECAY ? "ON" : "OFF"}`,
+        duration: 1000,
+      });
     }
 
     // Alt + F - Show/Hide controls
